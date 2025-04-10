@@ -1,5 +1,5 @@
 
-# 🔧 OpenCompBench: Benchmarking & Hybrid Compiler Pipelines for ML Models
+# 🔧 OpenCompBench: Benchmarking & Hybrid ML Compiler Pipelines
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-Research%20Prototype-blue)
