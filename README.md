@@ -26,20 +26,21 @@ However, today's ecosystem suffers from several pain points:
 - ❌ There's a **lack of standardized benchmarks** to guide these decisions.
 
 
-## ⚠️ Current Problems in Production with ML Compiler Stacks
+---
 
-| Issue                        | Description                                                                                     | Example                                                                 |
-|-----------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| One-size-fits-all Compilers | Teams use a single compiler (e.g., ONNX + TensorRT) for all models, even when suboptimal.      | MobileBERT with ONNX on Android is 2× slower than TFLite INT8.         |
-| Inefficient HW Match        | Models compiled for GPU often fail or underperform on CPU/mobile without modification.          | Whisper-Large for A100 crashes on Jetson Nano.                         |
-| Long Compilation Cycles     | Auto-tuning in compilers like TVM or AITemplate can take hours per target per model.            | TVM takes 8+ hours to optimize ViT on Jetson Orin.                     |
-| Manual Trial-and-Error      | Teams manually explore compiler + quantization + batch size settings to find best combination.  | Engineers try TensorRT FP16, TVM INT8, TFLite separately on YOLOv8.    |
-| Hardware Fragmentation      | Each platform requires separate compilation targets (CoreML, TFLite, TensorRT, etc.).           | Apps include TFLite (Android), CoreML (iOS), ONNX (desktop) versions.  |
-| Unpredictable Latency       | Compilers may pick unsafe quantization or kernel schedules, leading to latency spikes/crashes. | TensorRT INT8 on LLaMA-7B drops BLEU from 84 → 68 without calibration. |
+## ⚠️ Current Problems in Production with ML Compiler Stacks (Detailed Table)
 
-> These issues underscore the need for tools like OpenCompBench and meta-compilers that provide data-driven, optimized compiler selection — rather than relying on guesswork or defaults.
+| 🔹 Issue | 💬 Description | 🧠 Real-World Example | 📰 In the News |
+|---------|----------------|----------------------|----------------|
+| **1. One-size-fits-all Compilers** | Teams pick one compiler (e.g., ONNX + TensorRT) for all models, ignoring model/device differences. | MobileBERT with ONNX on Android is 2× slower than TFLite INT8. TFLite integrates better with Android NNAPI. | Google’s Gemini 1.5 uses mixed compilers (TPU + mobile); Hugging Face supports ONNX, TFLite, TensorRT in Optimum. |
+| **2. Inefficient Model–Hardware Match** | Models compiled for GPU often crash or underperform on mobile/edge devices. | Whisper-large compiled for A100 fails on Jetson Nano due to unsupported ops or VRAM limits. | OpenAI Whisper forks exist for TinyML; Edge Impulse and Apple push platform-specific compilers. |
+| **3. Long Compilation Cycles** | TVM, AITemplate require hours for model-device tuning, slowing production. | TVM’s Ansor takes 8+ hours to compile ViT on Jetson Orin. | Meta’s AITemplate (used in Stable Diffusion & LLaMA) is fast but takes time to compile. Transfer tuning is a workaround. |
+| **4. Manual Trial-and-Error** | Engineers manually test compilers, quantization, batch sizes. | YOLOv8 tested with TensorRT FP16 (unstable), TVM INT8 (accurate), TFLite (mobile). Time-consuming & non-reproducible. | Hugging Face + OpenVINO provide partial automation. NVIDIA Triton still needs manual tuning. |
+| **5. Hardware Fragmentation** | Models must be compiled separately for Android, iOS, web, desktop. | AR app with CLIP needs TFLite (Android), CoreML (iOS), ONNX (web), each with separate compilation/testing. | Google uses TFLite, TF.js, XLA; Apple uses CoreML + ANE with custom toolchain. |
+| **6. Unpredictable Latency / Memory** | Compilers may cause latency spikes or memory crashes with unsafe quantization. | LLaMA-7B INT8 quantized in TensorRT without calibration drops BLEU from 84 → 68 and spikes memory usage. | NVIDIA advises calibration caches and per-layer tuning. Mistral and Phi-3 focus on safe quantization. |
 
 ---
+
 
 ### 📊 Why Benchmarking + Data Collection Matters
 
